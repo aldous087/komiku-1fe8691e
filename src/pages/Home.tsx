@@ -44,8 +44,8 @@ const Home = () => {
       {/* Hot Comics Carousel */}
       <HotComicsCarousel />
 
-      {/* Ad Banner */}
-      <AdBanner position="header" />
+      {/* Ad Banner - Home Top */}
+      <AdBanner position="home-top" />
 
       {/* Domain Notice */}
       <DomainNotice />
