@@ -9,6 +9,7 @@ import { Bookmark, Eye, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { CommentSection } from "@/components/CommentSection";
+import { AdBanner } from "@/components/AdBanner";
 
 const KomikDetail = () => {
   const { slug } = useParams();
@@ -161,6 +162,9 @@ const KomikDetail = () => {
       </div>
 
       <p className="text-muted-foreground mb-6">{komik.description}</p>
+
+      {/* Ad Banner - Detail Sidebar */}
+      <AdBanner position="detail-sidebar" />
 
       {/* Chapters */}
       <Card className="p-4 mb-8">

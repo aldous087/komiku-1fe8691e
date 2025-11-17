@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 interface AdBannerProps {
-  position: "header" | "mid" | "reader" | "sidebar";
+  position: string;
 }
 
 export const AdBanner = ({ position }: AdBannerProps) => {
