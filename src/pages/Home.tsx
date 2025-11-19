@@ -57,8 +57,13 @@ const Home = () => {
 
   return (
     <div className="min-h-screen pb-20 bg-background">
-      {/* Ad Slots 1-9 */}
-      <AdSlotsSection slots={[1, 2, 3, 4, 5, 6, 7, 8, 9]} />
+      {/* Ad Slots 1-4 (2x2 Grid on Desktop) */}
+      <AdSlotsSection slots={[1, 2, 3, 4]} />
+      
+      {/* Ad Slots 5-9 (Vertical Full Width) */}
+      <div className="mt-[3px]">
+        <AdSlotsSection slots={[5, 6, 7, 8, 9]} />
+      </div>
 
       {/* Weekly Popular */}
       <div className="mb-[3px]">

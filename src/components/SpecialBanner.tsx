@@ -41,7 +41,7 @@ export const SpecialBanner = () => {
               loop
               muted
               playsInline
-              className="w-full block h-[230px] md:h-[300px] lg:h-[350px]"
+              className="w-full block h-[95px] md:h-[120px] lg:h-[150px]"
               style={{ 
                 objectFit: 'cover',
                 objectPosition: 'center',
@@ -52,7 +52,7 @@ export const SpecialBanner = () => {
             <img
               src={banner.image_url}
               alt="Special Banner"
-              className="w-full block h-[230px] md:h-[300px] lg:h-[350px]"
+              className="w-full block h-[95px] md:h-[120px] lg:h-[150px]"
               style={{ 
                 objectFit: 'cover',
                 objectPosition: 'center',
@@ -74,7 +74,7 @@ export const SpecialBanner = () => {
           loop
           muted
           playsInline
-          className="w-full block h-[230px] md:h-[300px] lg:h-[350px]"
+          className="w-full block h-[95px] md:h-[120px] lg:h-[150px]"
           style={{ 
             objectFit: 'cover',
             objectPosition: 'center',
@@ -85,7 +85,7 @@ export const SpecialBanner = () => {
         <img
           src={banner.image_url}
           alt="Special Banner"
-          className="w-full block h-[230px] md:h-[300px] lg:h-[350px]"
+          className="w-full block h-[95px] md:h-[120px] lg:h-[150px]"
           style={{ 
             objectFit: 'cover',
             objectPosition: 'center',
