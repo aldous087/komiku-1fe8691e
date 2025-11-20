@@ -34,11 +34,6 @@ export const AdSlotsSection = ({ slots = [1, 2, 3, 4, 5, 6, 7, 8, 9] }: AdSlotsS
     return 'image';
   };
 
-  // Check if we have first 4 slots (1-4) for grid layout
-  const isFirstFourSlots = slots.length === 4 && slots.every(s => s >= 1 && s <= 4);
-  const firstFourAds = isFirstFourSlots ? ads : [];
-  const remainingAds = isFirstFourSlots ? [] : ads;
-
   const renderBanner = (ad: any, slotNumber: number) => {
     const content = getFileType(ad.image_url) === 'video' ? (
       <video
@@ -47,22 +42,32 @@ export const AdSlotsSection = ({ slots = [1, 2, 3, 4, 5, 6, 7, 8, 9] }: AdSlotsS
         loop
         muted
         playsInline
-        className="w-full block h-[95px] md:h-[120px] lg:h-[150px]"
+        className="w-full block"
         style={{ 
-          objectFit: 'cover',
+          objectFit: 'contain',
           objectPosition: 'center',
-          display: 'block'
+          display: 'block',
+          width: '100%',
+          height: 'auto',
+          aspectRatio: 'auto',
+          margin: 0,
+          padding: 0
         }}
       />
     ) : (
       <img
         src={ad.image_url}
         alt={`Banner ${slotNumber}`}
-        className="w-full block h-[95px] md:h-[120px] lg:h-[150px]"
+        className="w-full block"
         style={{ 
-          objectFit: 'cover',
+          objectFit: 'contain',
           objectPosition: 'center',
-          display: 'block'
+          display: 'block',
+          width: '100%',
+          height: 'auto',
+          aspectRatio: 'auto',
+          margin: 0,
+          padding: 0
         }}
       />
     );
@@ -81,30 +86,16 @@ export const AdSlotsSection = ({ slots = [1, 2, 3, 4, 5, 6, 7, 8, 9] }: AdSlotsS
     );
   };
 
-  if (isFirstFourSlots && firstFourAds.length > 0) {
-    // Desktop: 2x2 grid for first 4 banners
-    // Mobile: Stack vertically
-    return (
-      <div className="w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-[3px]">
-          {firstFourAds.map(({ slotNumber, ad }) => (
-            <div key={ad.id} className="w-full">
-              {renderBanner(ad, slotNumber)}
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  // For slots 5-12: vertical full width
+  // Desktop: 2 columns grid, Mobile: 1 column
   return (
-    <div className="space-y-[3px]">
-      {remainingAds.map(({ slotNumber, ad }) => (
-        <div key={ad.id} className="w-full">
-          {renderBanner(ad, slotNumber)}
-        </div>
-      ))}
+    <div className="w-full">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-[3px]">
+        {ads.map(({ slotNumber, ad }) => (
+          <div key={ad.id} className="w-full">
+            {renderBanner(ad, slotNumber)}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

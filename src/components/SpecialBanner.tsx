@@ -41,22 +41,32 @@ export const SpecialBanner = () => {
               loop
               muted
               playsInline
-              className="w-full block h-[95px] md:h-[120px] lg:h-[150px]"
+              className="w-full block"
               style={{ 
-                objectFit: 'cover',
+                objectFit: 'contain',
                 objectPosition: 'center',
-                display: 'block'
+                display: 'block',
+                width: '100%',
+                height: 'auto',
+                aspectRatio: 'auto',
+                margin: 0,
+                padding: 0
               }}
             />
           ) : (
             <img
               src={banner.image_url}
               alt="Special Banner"
-              className="w-full block h-[95px] md:h-[120px] lg:h-[150px]"
+              className="w-full block"
               style={{ 
-                objectFit: 'cover',
+                objectFit: 'contain',
                 objectPosition: 'center',
-                display: 'block'
+                display: 'block',
+                width: '100%',
+                height: 'auto',
+                aspectRatio: 'auto',
+                margin: 0,
+                padding: 0
               }}
             />
           )}
@@ -74,22 +84,32 @@ export const SpecialBanner = () => {
           loop
           muted
           playsInline
-          className="w-full block h-[95px] md:h-[120px] lg:h-[150px]"
+          className="w-full block"
           style={{ 
-            objectFit: 'cover',
+            objectFit: 'contain',
             objectPosition: 'center',
-            display: 'block'
+            display: 'block',
+            width: '100%',
+            height: 'auto',
+            aspectRatio: 'auto',
+            margin: 0,
+            padding: 0
           }}
         />
       ) : (
         <img
           src={banner.image_url}
           alt="Special Banner"
-          className="w-full block h-[95px] md:h-[120px] lg:h-[150px]"
+          className="w-full block"
           style={{ 
-            objectFit: 'cover',
+            objectFit: 'contain',
             objectPosition: 'center',
-            display: 'block'
+            display: 'block',
+            width: '100%',
+            height: 'auto',
+            aspectRatio: 'auto',
+            margin: 0,
+            padding: 0
           }}
         />
       )}
