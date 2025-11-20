@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronLeft, ChevronRight, Menu } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { AdBanner } from "@/components/AdBanner";
+import { ChapterEndSection } from "@/components/ChapterEndSection";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -215,6 +216,15 @@ const Reader = () => {
           </div>
         ))}
       </div>
+
+      {/* End of Chapter Section */}
+      <ChapterEndSection 
+        komikId={komik!.id}
+        komikSlug={slug!}
+        chapterId={chapter!.id}
+        currentChapterNumber={Number(chapterNumber)}
+        nextChapter={nextChapter}
+      />
 
       {/* Bottom Navigation - Floating transparent */}
       <div 

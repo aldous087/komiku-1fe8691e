@@ -7,6 +7,7 @@ const corsHeaders = {
 
 interface CommentRequest {
   komikId: string;
+  chapterId?: string;
   text: string;
 }
 
@@ -84,7 +85,7 @@ Deno.serve(async (req) => {
     }
 
     const body: CommentRequest = await req.json();
-    const { komikId, text } = body;
+    const { komikId, chapterId, text } = body;
 
     // Validate input
     if (!komikId || !text) {
@@ -134,14 +135,21 @@ Deno.serve(async (req) => {
     const username = user.email?.split('@')[0] || 'Anonymous';
 
     // Insert comment
+    const insertData: any = {
+      komik_id: komikId,
+      user_id: user.id,
+      username,
+      text: sanitizedText
+    };
+    
+    // Add chapter_id if provided (for chapter-specific comments)
+    if (chapterId) {
+      insertData.chapter_id = chapterId;
+    }
+    
     const { data: comment, error: insertError } = await supabase
       .from('comments')
-      .insert({
-        komik_id: komikId,
-        user_id: user.id,
-        username,
-        text: sanitizedText
-      })
+      .insert(insertData)
       .select()
       .single();
 

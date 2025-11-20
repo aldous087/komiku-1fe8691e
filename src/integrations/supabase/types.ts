@@ -226,6 +226,7 @@ export type Database = {
       }
       comments: {
         Row: {
+          chapter_id: string | null
           created_at: string | null
           id: string
           komik_id: string
@@ -234,6 +235,7 @@ export type Database = {
           username: string
         }
         Insert: {
+          chapter_id?: string | null
           created_at?: string | null
           id?: string
           komik_id: string
@@ -242,6 +244,7 @@ export type Database = {
           username: string
         }
         Update: {
+          chapter_id?: string | null
           created_at?: string | null
           id?: string
           komik_id?: string
@@ -250,6 +253,13 @@ export type Database = {
           username?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "comments_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "comments_komik_id_fkey"
             columns: ["komik_id"]
