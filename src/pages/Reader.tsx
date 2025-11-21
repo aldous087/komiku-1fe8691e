@@ -218,13 +218,15 @@ const Reader = () => {
       </div>
 
       {/* End of Chapter Section */}
-      <ChapterEndSection 
-        komikId={komik!.id}
-        komikSlug={slug!}
-        chapterId={chapter!.id}
-        currentChapterNumber={Number(chapterNumber)}
-        nextChapter={nextChapter}
-      />
+      {komik && chapter && (
+        <ChapterEndSection 
+          komikId={komik.id}
+          komikSlug={slug!}
+          chapterId={chapter.id}
+          currentChapterNumber={Number(chapterNumber)}
+          nextChapter={nextChapter}
+        />
+      )}
 
       {/* Bottom Navigation - Floating transparent */}
       <div 
