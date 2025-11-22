@@ -23,6 +23,7 @@ import AdminAds from "./pages/admin/AdminAds";
 import AdminAdForm from "./pages/admin/AdminAdForm";
 import AdminComments from "./pages/admin/AdminComments";
 import AdminSources from "./pages/admin/AdminSources";
+import AdminCatalog from "./pages/admin/AdminCatalog";
 import VerifyOTP from "./pages/admin/VerifyOTP";
 import AdminLogin from "./pages/AdminLogin";
 import NotFound from "./pages/NotFound";
@@ -61,8 +62,9 @@ const App = () => (
             <Route path="ads/tambah" element={<AdminAdForm />} />
             <Route path="ads/:id/edit" element={<AdminAdForm />} />
             <Route path="comments" element={<AdminComments />} />
-            <Route path="sources" element={<AdminSources />} />
-          </Route>
+              <Route path="sources" element={<AdminSources />} />
+              <Route path="catalog" element={<AdminCatalog />} />
+            </Route>
           
           {/* Main Routes (with nav bars) */}
           <Route path="/*" element={

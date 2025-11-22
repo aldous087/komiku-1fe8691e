@@ -1,7 +1,7 @@
 import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Home, BookOpen, FileText, Image, MessageSquare, LogOut, RefreshCw } from "lucide-react";
+import { Home, BookOpen, FileText, Image, MessageSquare, LogOut, RefreshCw, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useAdminGuard } from "@/hooks/useAdminGuard";
@@ -24,6 +24,7 @@ const AdminLayout = () => {
     { to: "/admin/ads", icon: Image, label: "Iklan" },
     { to: "/admin/comments", icon: MessageSquare, label: "Komentar" },
     { to: "/admin/sources", icon: RefreshCw, label: "Scraper" },
+    { to: "/admin/catalog", icon: Download, label: "Catalog" },
   ];
 
   if (isLoading || !isAdmin) {
