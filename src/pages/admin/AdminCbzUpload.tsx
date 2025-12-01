@@ -132,12 +132,12 @@ export default function AdminCbzUpload() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="comic-select">Komik (Opsional)</Label>
-              <Select value={selectedComicId} onValueChange={setSelectedComicId}>
+              <Select value={selectedComicId} onValueChange={(value) => setSelectedComicId(value === "auto-create" ? "" : value)}>
                 <SelectTrigger id="comic-select">
                   <SelectValue placeholder="Auto-create dari metadata" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Auto-create dari metadata</SelectItem>
+                <SelectContent className="bg-background z-50">
+                  <SelectItem value="auto-create">Auto-create dari metadata</SelectItem>
                   {loadingComics ? (
                     <SelectItem value="loading" disabled>Loading...</SelectItem>
                   ) : (
@@ -150,7 +150,7 @@ export default function AdminCbzUpload() {
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
-                Kosongkan untuk membuat komik baru secara otomatis dari metadata CBZ
+                Pilih "Auto-create" untuk membuat komik baru secara otomatis dari metadata CBZ
               </p>
             </div>
 
