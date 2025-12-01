@@ -28,6 +28,7 @@ import AdminCatalog from "./pages/admin/AdminCatalog";
 import AdminScraperConfig from "./pages/admin/AdminScraperConfig";
 import VerifyOTP from "./pages/admin/VerifyOTP";
 import AdminLogin from "./pages/AdminLogin";
+import AdminCbzUpload from "./pages/admin/AdminCbzUpload";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -68,6 +69,7 @@ const App = () => (
             <Route path="sources" element={<AdminSources />} />
             <Route path="catalog" element={<AdminCatalog />} />
             <Route path="scraper" element={<AdminScraperConfig />} />
+            <Route path="cbz-upload" element={<AdminCbzUpload />} />
           </Route>
           
           {/* Main Routes (with nav bars) */}

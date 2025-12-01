@@ -3,6 +3,16 @@
 
 This guide will help you migrate your entire KomikRu project from Lovable to your own infrastructure.
 
+### ✨ Features Included
+
+- 📚 Complete comic management system
+- 🔄 Auto Catalog (10 pages fetch)
+- ⚡ Smart Chapter Cache (24 hours)
+- 📦 **CBZ Upload Module** - Auto-detect, compress, and upload CBZ files
+- 💾 R2 Storage integration
+- 🔐 Admin authentication with OTP
+- 📊 Analytics and popularity tracking
+
 ---
 
 ## 📋 **Prerequisites**
