@@ -73,6 +73,12 @@ CREATE TABLE public.chapters (
     title TEXT,
     source_chapter_id TEXT,
     source_url TEXT,
+    summary TEXT, -- NEW: chapter summary from CBZ
+    total_pages INTEGER, -- NEW: total pages count
+    r2_base_path TEXT, -- NEW: R2 storage base path
+    html_info_url TEXT, -- NEW: URL to info.html in R2
+    cover_page_url TEXT, -- NEW: cover page URL (page 1)
+    metadata JSONB, -- NEW: parsed metadata from ComicInfo.xml
     created_at TIMESTAMPTZ DEFAULT now(),
     UNIQUE(komik_id, chapter_number)
 );
@@ -212,6 +218,20 @@ CREATE TABLE public.audit_logs (
     user_agent TEXT,
     metadata JSONB,
     created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- CBZ Upload Logs table (NEW: track CBZ uploads)
+CREATE TABLE public.cbz_upload_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    comic_id UUID REFERENCES public.komik(id) ON DELETE CASCADE,
+    chapter_id UUID REFERENCES public.chapters(id) ON DELETE CASCADE,
+    original_filename TEXT,
+    total_pages INTEGER,
+    status TEXT, -- 'SUCCESS' / 'FAILED'
+    error_message TEXT,
+    metadata JSONB,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
 );
 
 -- ============================================
@@ -599,6 +619,11 @@ CREATE TRIGGER update_reading_history_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION public.update_updated_at_column();
 
+CREATE TRIGGER update_cbz_upload_logs_updated_at
+  BEFORE UPDATE ON public.cbz_upload_logs
+  FOR EACH ROW
+  EXECUTE FUNCTION public.update_updated_at_column();
+
 -- ============================================
 -- ROW LEVEL SECURITY (RLS)
 -- ============================================
@@ -620,6 +645,7 @@ ALTER TABLE public.rate_limits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.admin_otp ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.admin_2fa_sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.cbz_upload_logs ENABLE ROW LEVEL SECURITY;
 
 -- Sources policies
 CREATE POLICY "Anyone can view active sources" ON public.sources
@@ -777,6 +803,16 @@ CREATE POLICY "Users can manage own 2FA sessions" ON public.admin_2fa_sessions
 -- Audit Logs policies
 CREATE POLICY "Admins can view audit logs" ON public.audit_logs
   FOR SELECT USING (public.has_role(auth.uid(), 'admin'));
+
+-- CBZ Upload Logs policies
+CREATE POLICY "Admins can view CBZ logs" ON public.cbz_upload_logs
+  FOR SELECT USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Service can insert CBZ logs" ON public.cbz_upload_logs
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Service can update CBZ logs" ON public.cbz_upload_logs
+  FOR UPDATE USING (true) WITH CHECK (true);
 
 -- ============================================
 -- SEED DATA (OPTIONAL)
