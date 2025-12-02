@@ -1,10 +1,22 @@
+// Fetch Comic List Edge Function - Secured with Admin Auth & Rate Limiting
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import * as cheerio from 'https://esm.sh/cheerio@1.0.0-rc.12';
+import { 
+  requireAdmin, 
+  checkRateLimit, 
+  errorResponse,
+  logAdminAction 
+} from '../_shared/securityHelpers.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Rate limit: 10 bulk fetch requests per minute per user
+const RATE_LIMIT_MAX = 10;
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 
 const lastRequestTime: Record<string, number> = {};
 const MIN_DELAY_MS = 2000;
@@ -133,11 +145,41 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // === SECURITY: Require Admin Authentication ===
+    const authResult = await requireAdmin(req);
+    
+    if (!authResult.authorized) {
+      console.log('Auth failed:', authResult.error);
+      return errorResponse(
+        authResult.error || 'Unauthorized',
+        authResult.statusCode || 401,
+        corsHeaders
+      );
+    }
+
+    const userId = authResult.userId!;
+    console.log(`Admin user ${userId} authenticated for bulk fetch`);
+
+    // === SECURITY: Rate Limiting ===
+    const rateLimit = checkRateLimit(`fetch-list:${userId}`, RATE_LIMIT_MAX, RATE_LIMIT_WINDOW_MS);
+    
+    if (!rateLimit.allowed) {
+      console.log(`Rate limit exceeded for user ${userId}`);
+      return errorResponse(
+        'Rate limit exceeded. Please wait before making more requests.',
+        429,
+        corsHeaders
+      );
+    }
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const { sourceCode, maxPages = 5 } = await req.json();
+
+    // Limit maxPages to prevent abuse
+    const safeMaxPages = Math.min(maxPages, 10);
 
     // Get sources
     const { data: sources } = await supabase
@@ -146,7 +188,7 @@ Deno.serve(async (req) => {
       .eq('is_active', true);
 
     if (!sources || sources.length === 0) {
-      throw new Error('No active sources found');
+      return errorResponse('No active sources found', 404, corsHeaders);
     }
 
     let totalComics = 0;
@@ -162,7 +204,7 @@ Deno.serve(async (req) => {
       let currentPage = 1;
       let hasMore = true;
 
-      while (hasMore && currentPage <= maxPages) {
+      while (hasMore && currentPage <= safeMaxPages) {
         try {
           let result;
           
@@ -238,11 +280,22 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Log admin action
+    await logAdminAction(supabase, userId, 'FETCH_COMIC_LIST', 'bulk_scrape', undefined, {
+      sourceCode: sourceCode || 'ALL',
+      totalComics,
+      errors: errors.length,
+    });
+
     return new Response(
       JSON.stringify({
         success: true,
         totalComics,
         errors: errors.length > 0 ? errors : undefined,
+        rateLimit: {
+          remaining: rateLimit.remaining,
+          resetAt: new Date(rateLimit.resetAt).toISOString(),
+        },
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

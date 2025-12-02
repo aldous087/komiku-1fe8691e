@@ -9,8 +9,10 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, AlertTriangle } from "lucide-react";
+import { isValidAdUrl } from "@/lib/security-utils";
 
 interface AdFormData {
   position: string;
@@ -26,8 +28,12 @@ const AdminAdForm = () => {
   const isEdit = !!id;
   const [isActive, setIsActive] = useState(true);
   const [selectedSlot, setSelectedSlot] = useState<string>("1");
+  const [urlErrors, setUrlErrors] = useState<{ image?: string; link?: string }>({});
 
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm<AdFormData>();
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<AdFormData>();
+  
+  const imageUrl = watch("image_url");
+  const linkUrl = watch("link_url");
 
   const { data: ad } = useQuery({
     queryKey: ["ad", id],
@@ -54,9 +60,30 @@ const AdminAdForm = () => {
       setValue("position", ad.position);
       setValue("image_url", ad.image_url);
       setValue("link_url", ad.link_url || "");
-      setIsActive(ad.is_active);
+      setIsActive(ad.is_active ?? true);
     }
   }, [ad, setValue]);
+
+  // Validate URLs on change
+  useEffect(() => {
+    const newErrors: { image?: string; link?: string } = {};
+    
+    if (imageUrl) {
+      const result = isValidAdUrl(imageUrl, 'media');
+      if (!result.valid) {
+        newErrors.image = result.error;
+      }
+    }
+    
+    if (linkUrl) {
+      const result = isValidAdUrl(linkUrl, 'link');
+      if (!result.valid) {
+        newErrors.link = result.error;
+      }
+    }
+    
+    setUrlErrors(newErrors);
+  }, [imageUrl, linkUrl]);
 
   const saveMutation = useMutation({
     mutationFn: async (data: AdFormData) => {
@@ -64,7 +91,7 @@ const AdminAdForm = () => {
       const adData = {
         position,
         image_url: data.image_url,
-        link_url: data.link_url,
+        link_url: data.link_url || null,
         is_active: isActive,
       };
 
@@ -93,8 +120,15 @@ const AdminAdForm = () => {
   });
 
   const onSubmit = (data: AdFormData) => {
+    // Validate URLs before submit
+    if (urlErrors.image || urlErrors.link) {
+      toast.error("Perbaiki error URL terlebih dahulu");
+      return;
+    }
     saveMutation.mutate(data);
   };
+
+  const hasUrlErrors = urlErrors.image || urlErrors.link;
 
   return (
     <div>
@@ -132,10 +166,17 @@ const AdminAdForm = () => {
               id="image_url"
               {...register("image_url", { required: "URL media harus diisi" })}
               placeholder="https://example.com/banner.webp atau video.mp4"
+              className={urlErrors.image ? "border-destructive" : ""}
             />
             {errors.image_url && <p className="text-sm text-destructive mt-1">{errors.image_url.message}</p>}
+            {urlErrors.image && (
+              <p className="text-sm text-destructive mt-1 flex items-center gap-1">
+                <AlertTriangle className="h-3 w-3" />
+                {urlErrors.image}
+              </p>
+            )}
             <p className="text-xs text-muted-foreground mt-1">
-              Mendukung: WebP animasi (1200×300), Video (MP4), atau gambar statis
+              Mendukung: WebP animasi (1200×300), Video (MP4), atau gambar statis. Hanya HTTPS.
             </p>
           </div>
 
@@ -145,9 +186,16 @@ const AdminAdForm = () => {
               id="link_url"
               {...register("link_url")}
               placeholder="https://example.com"
+              className={urlErrors.link ? "border-destructive" : ""}
             />
+            {urlErrors.link && (
+              <p className="text-sm text-destructive mt-1 flex items-center gap-1">
+                <AlertTriangle className="h-3 w-3" />
+                {urlErrors.link}
+              </p>
+            )}
             <p className="text-xs text-muted-foreground mt-1">
-              Link tujuan ketika iklan diklik (opsional)
+              Link tujuan ketika iklan diklik (opsional, harus HTTPS)
             </p>
           </div>
 
@@ -160,8 +208,17 @@ const AdminAdForm = () => {
             <Label htmlFor="is_active">Aktifkan iklan</Label>
           </div>
 
+          {hasUrlErrors && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                URL tidak valid. Pastikan semua URL menggunakan HTTPS dan tidak mengandung protokol berbahaya (javascript:, data:, dll).
+              </AlertDescription>
+            </Alert>
+          )}
+
           <div className="flex gap-4">
-            <Button type="submit" disabled={saveMutation.isPending}>
+            <Button type="submit" disabled={saveMutation.isPending || !!hasUrlErrors}>
               {saveMutation.isPending ? "Menyimpan..." : "Simpan"}
             </Button>
             <Button type="button" variant="outline" onClick={() => navigate("/admin/ads")}>

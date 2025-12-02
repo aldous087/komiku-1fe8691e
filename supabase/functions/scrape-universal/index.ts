@@ -1,13 +1,24 @@
-// Universal Scraper Edge Function - Scrape any comic website
+// Universal Scraper Edge Function - Secured with Admin Auth & Rate Limiting
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { scrapeComicDetail, scrapeChapterPages } from '../_shared/scraperAdaptersV2.ts';
 import { slugify } from '../_shared/httpClient.ts';
+import { 
+  requireAdmin, 
+  checkRateLimit, 
+  isValidScraperUrl, 
+  errorResponse,
+  logAdminAction 
+} from '../_shared/securityHelpers.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Rate limit: 30 scrape requests per minute per user
+const RATE_LIMIT_MAX = 30;
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -15,6 +26,33 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // === SECURITY: Require Admin Authentication ===
+    const authResult = await requireAdmin(req);
+    
+    if (!authResult.authorized) {
+      console.log('Auth failed:', authResult.error);
+      return errorResponse(
+        authResult.error || 'Unauthorized',
+        authResult.statusCode || 401,
+        corsHeaders
+      );
+    }
+
+    const userId = authResult.userId!;
+    console.log(`Admin user ${userId} authenticated for scraping`);
+
+    // === SECURITY: Rate Limiting ===
+    const rateLimit = checkRateLimit(`scrape:${userId}`, RATE_LIMIT_MAX, RATE_LIMIT_WINDOW_MS);
+    
+    if (!rateLimit.allowed) {
+      console.log(`Rate limit exceeded for user ${userId}`);
+      return errorResponse(
+        'Rate limit exceeded. Please wait before making more requests.',
+        429,
+        corsHeaders
+      );
+    }
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -22,7 +60,26 @@ Deno.serve(async (req) => {
     const { url, sourceCode, customSelectors, komikId } = await req.json();
 
     if (!url) {
-      throw new Error('URL is required');
+      return errorResponse('URL is required', 400, corsHeaders);
+    }
+
+    // === SECURITY: URL Validation (SSRF Prevention) ===
+    const urlValidation = isValidScraperUrl(url);
+    
+    if (!urlValidation.valid) {
+      console.log(`Invalid scraper URL: ${url} - ${urlValidation.error}`);
+      
+      // Log suspicious activity
+      await logAdminAction(supabase, userId, 'SCRAPE_BLOCKED', 'scraper', undefined, {
+        url,
+        reason: urlValidation.error,
+      });
+      
+      return errorResponse(
+        urlValidation.error || 'URL not allowed',
+        400,
+        corsHeaders
+      );
     }
 
     console.log(`Universal scraper starting for: ${url}`);
@@ -40,6 +97,10 @@ Deno.serve(async (req) => {
         detectedSourceCode = 'SHINIGAMI';
       } else if (hostname.includes('komikcast')) {
         detectedSourceCode = 'KOMIKCAST';
+      } else if (hostname.includes('komiku')) {
+        detectedSourceCode = 'KOMIKU';
+      } else if (hostname.includes('komikindo')) {
+        detectedSourceCode = 'KOMIKINDO';
       }
     }
     
@@ -162,6 +223,13 @@ Deno.serve(async (req) => {
       status: 'SUCCESS',
     });
 
+    // Log admin action
+    await logAdminAction(supabase, userId, 'SCRAPE_SUCCESS', 'comic', finalKomikId, {
+      url,
+      chaptersCount: comicData.chapters.length,
+      chaptersSynced: syncedCount,
+    });
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -176,6 +244,10 @@ Deno.serve(async (req) => {
         },
         chaptersCount: comicData.chapters.length,
         chaptersSynced: syncedCount,
+        rateLimit: {
+          remaining: rateLimit.remaining,
+          resetAt: new Date(rateLimit.resetAt).toISOString(),
+        },
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
