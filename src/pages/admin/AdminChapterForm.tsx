@@ -8,9 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Upload, Link2 } from "lucide-react";
 import { ChapterImagesUpload } from "@/components/ChapterImagesUpload";
+import { ImportImageLinksPanel } from "@/components/ImportImageLinksPanel";
 
 interface ChapterFormData {
   komik_id: string;
@@ -211,11 +213,33 @@ const AdminChapterForm = () => {
           </div>
 
           {selectedKomikId && (
-            <ChapterImagesUpload
-              komikId={selectedKomikId}
-              chapterId={id || "temp"}
-              onUploadSuccess={(urls) => setUploadedImages(urls)}
-            />
+            <Tabs defaultValue="hotlink" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="hotlink" className="flex items-center gap-2">
+                  <Link2 className="h-4 w-4" />
+                  Import Link (Hotlink)
+                </TabsTrigger>
+                <TabsTrigger value="upload" className="flex items-center gap-2">
+                  <Upload className="h-4 w-4" />
+                  Upload File
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="hotlink" className="mt-4">
+                <ImportImageLinksPanel
+                  onImportSuccess={(urls) => setUploadedImages(urls)}
+                  disabled={saveMutation.isPending}
+                />
+              </TabsContent>
+              
+              <TabsContent value="upload" className="mt-4">
+                <ChapterImagesUpload
+                  komikId={selectedKomikId}
+                  chapterId={id || "temp"}
+                  onUploadSuccess={(urls) => setUploadedImages(urls)}
+                />
+              </TabsContent>
+            </Tabs>
           )}
 
           {uploadedImages.length > 0 && (
@@ -223,6 +247,26 @@ const AdminChapterForm = () => {
               <p className="text-sm font-medium mb-2">
                 {uploadedImages.length} gambar siap disimpan
               </p>
+              <div className="grid grid-cols-6 sm:grid-cols-8 gap-1 max-h-32 overflow-y-auto">
+                {uploadedImages.slice(0, 16).map((url, idx) => (
+                  <div key={idx} className="aspect-[3/4] relative">
+                    <img 
+                      src={url} 
+                      alt={`Page ${idx + 1}`} 
+                      className="w-full h-full object-cover rounded border border-border"
+                      loading="lazy"
+                    />
+                    <span className="absolute bottom-0 right-0 bg-background/80 text-[10px] px-1 rounded-tl">
+                      {idx + 1}
+                    </span>
+                  </div>
+                ))}
+                {uploadedImages.length > 16 && (
+                  <div className="aspect-[3/4] flex items-center justify-center bg-muted rounded border border-border text-xs text-muted-foreground">
+                    +{uploadedImages.length - 16}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
