@@ -4,14 +4,15 @@ import { Upload, Image as ImageIcon, X } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { uploadComicCover } from "@/lib/storage";
+import { secureUploadCover } from "@/lib/secure-storage";
 
 interface SimpleCoverUploadProps {
   value: string | null;
   onChange: (url: string | null) => void;
+  komikId?: string;
 }
 
-export const SimpleCoverUpload = ({ value, onChange }: SimpleCoverUploadProps) => {
+export const SimpleCoverUpload = ({ value, onChange, komikId }: SimpleCoverUploadProps) => {
   const [uploading, setUploading] = useState(false);
 
   const onDrop = useCallback(
@@ -22,7 +23,9 @@ export const SimpleCoverUpload = ({ value, onChange }: SimpleCoverUploadProps) =
       setUploading(true);
 
       try {
-        const publicUrl = await uploadComicCover(file);
+        // Use a temporary ID if komikId not provided (for new comics)
+        const uploadId = komikId || crypto.randomUUID();
+        const publicUrl = await secureUploadCover(file, uploadId);
         onChange(publicUrl);
         toast.success("Cover uploaded successfully");
       } catch (error) {
@@ -32,7 +35,7 @@ export const SimpleCoverUpload = ({ value, onChange }: SimpleCoverUploadProps) =
         setUploading(false);
       }
     },
-    [onChange]
+    [onChange, komikId]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
