@@ -1,13 +1,12 @@
 project_id = "vmeooasvptndyifwggoi"
 
-# Security: Enable JWT verification for scraper functions
+# Security: Enable JWT verification for sensitive functions
 [functions.scrape-universal]
 verify_jwt = true
 
 [functions.fetch-comic-list]
 verify_jwt = true
 
-# Other functions with JWT verification
 [functions.scrape-comic]
 verify_jwt = false
 
@@ -38,6 +37,12 @@ verify_jwt = true
 [functions.secure-upload-cover]
 verify_jwt = true
 
+[functions.secure-upload-ad]
+verify_jwt = true
+
+[functions.secure-upload-flag]
+verify_jwt = true
+
 [functions.send-admin-otp]
 verify_jwt = false
 
@@ -46,48 +51,3 @@ verify_jwt = true
 
 [functions.sync-comic]
 verify_jwt = true
-
-[functions.cache-chapter]
-verify_jwt = false
-
-[functions.cache-chapter-r2]
-verify_jwt = false
-
-[functions.cleanup-cache]
-verify_jwt = false
-
-[functions.cleanup-cache-r2]
-verify_jwt = false
-
-[functions.fetch-comic-list]
-verify_jwt = false
-
-[functions.sanitize-comment]
-verify_jwt = false
-
-[functions.scrape-comic]
-verify_jwt = false
-
-[functions.scrape-universal]
-verify_jwt = false
-
-[functions.secure-upload-chapter]
-verify_jwt = false
-
-[functions.secure-upload-cover]
-verify_jwt = false
-
-[functions.send-admin-otp]
-verify_jwt = false
-
-[functions.sync-comic]
-verify_jwt = false
-
-[functions.upload-cbz]
-verify_jwt = false
-
-[functions.delete-comic]
-verify_jwt = false
-
-[functions.delete-chapter]
-verify_jwt = false

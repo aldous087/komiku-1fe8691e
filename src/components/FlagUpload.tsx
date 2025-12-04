@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { uploadCountryFlag } from "@/lib/storage";
+import { secureUploadFlag } from "@/lib/secure-storage";
 
 interface FlagUploadProps {
   value: string | null;
@@ -20,7 +20,7 @@ export const FlagUpload = ({ value, onChange }: FlagUploadProps) => {
     setUploading(true);
 
     try {
-      const publicUrl = await uploadCountryFlag(file);
+      const publicUrl = await secureUploadFlag(file);
       setPreview(publicUrl);
       onChange(publicUrl);
       toast.success("Flag uploaded successfully");

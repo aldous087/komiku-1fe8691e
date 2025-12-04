@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Upload, Image as ImageIcon, Video } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { uploadAdImage, uploadAdVideo } from "@/lib/storage";
+import { secureUploadAdMedia } from "@/lib/secure-storage";
 import { useToast } from "@/hooks/use-toast";
 
 interface AdMediaUploadProps {
@@ -28,10 +28,7 @@ export const AdMediaUpload = ({
       setUploading(true);
 
       try {
-        const url =
-          type === "image"
-            ? await uploadAdImage(file)
-            : await uploadAdVideo(file);
+        const url = await secureUploadAdMedia(file, type);
 
         setPreviewUrl(url);
         onUploadSuccess(url);
@@ -44,7 +41,7 @@ export const AdMediaUpload = ({
         console.error("Upload error:", error);
         toast({
           title: "Error",
-          description: `Gagal upload ${type === "image" ? "gambar" : "video"}`,
+          description: error instanceof Error ? error.message : `Gagal upload ${type === "image" ? "gambar" : "video"}`,
           variant: "destructive",
         });
       } finally {

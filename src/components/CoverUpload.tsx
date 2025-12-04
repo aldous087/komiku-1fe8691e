@@ -3,7 +3,7 @@ import { useDropzone } from "react-dropzone";
 import { Upload, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { uploadComicCover } from "@/lib/storage";
+import { secureUploadCover } from "@/lib/secure-storage";
 import { useToast } from "@/hooks/use-toast";
 
 interface CoverUploadProps {
@@ -29,7 +29,7 @@ export const CoverUpload = ({
       setUploading(true);
 
       try {
-        const url = await uploadComicCover(file, komikId);
+        const url = await secureUploadCover(file, komikId);
         setPreviewUrl(url);
         onUploadSuccess(url);
         toast({
@@ -40,7 +40,7 @@ export const CoverUpload = ({
         console.error("Upload error:", error);
         toast({
           title: "Error",
-          description: "Gagal upload cover",
+          description: error instanceof Error ? error.message : "Gagal upload cover",
           variant: "destructive",
         });
       } finally {

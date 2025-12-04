@@ -4,7 +4,7 @@ import { Upload, Images } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { uploadChapterImages } from "@/lib/storage";
+import { secureUploadChapterImages } from "@/lib/secure-storage";
 import { useToast } from "@/hooks/use-toast";
 
 interface ChapterImagesUploadProps {
@@ -46,7 +46,7 @@ export const ChapterImagesUpload = ({
         const totalFiles = sortedFiles.length;
         let completed = 0;
 
-        const urls = await uploadChapterImages(
+        const urls = await secureUploadChapterImages(
           sortedFiles,
           komikId,
           chapterId,
